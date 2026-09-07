@@ -40,7 +40,13 @@ export const barrelShape: Check = {
 	async run(context: CheckContext) {
 		const violations: Violation[] = []
 		const candidates = context.files.filter(
-			(file) => file.endsWith('/index.ts') || file.endsWith('/index.tsx'),
+			(file) =>
+				(file.endsWith('/index.ts') || file.endsWith('/index.tsx')) &&
+				// Under a file-based router, `routes/index.tsx` is the `/` route:
+				// the name is the URL, not a claim about the file's shape. Read as
+				// a barrel it produced 182 findings on a freshly generated project,
+				// every one of them a line of an ordinary screen.
+				!file.includes('/routes/'),
 		)
 		const barrels: string[] = []
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { execFile } from 'node:child_process'
-import { readFile } from 'node:fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import process from 'node:process'
 import { promisify } from 'node:util'
@@ -63,6 +63,52 @@ async function git(cwd: string, args: string[]): Promise<string> {
 	}
 }
 
+/**
+ * The directories no gate has an opinion about.
+ *
+ * `.git` and `node_modules` for the obvious reason; `dist` and `coverage`
+ * because they are outputs, and a gate that reads them reports on code nobody
+ * wrote.
+ */
+const UNWALKED = new Set([
+	'.git',
+	'coverage',
+	'dist',
+	'node_modules',
+])
+
+/**
+ * The files, when there is no git repository to ask.
+ *
+ * `git ls-files` returns nothing outside a repository, and the failure is
+ * silent: every path-based gate then reports `skipped — no files to inspect`,
+ * which reads exactly like a healthy run. A freshly generated project is
+ * precisely that case, and it is the moment the structural gates matter most.
+ */
+async function walk(cwd: string, prefix = ''): Promise<string[]> {
+	const entries = await readdir(resolve(cwd, prefix), {
+		withFileTypes: true,
+	}).catch(() => [])
+	const files: string[] = []
+
+	for (const entry of entries) {
+		if (UNWALKED.has(entry.name)) {
+			continue
+		}
+
+		const path = prefix ? `${prefix}/${entry.name}` : entry.name
+
+		if (entry.isDirectory()) {
+			files.push(...(await walk(cwd, path)))
+			continue
+		}
+
+		files.push(path)
+	}
+
+	return files
+}
+
 async function buildContext(
 	cwd: string,
 	baseline: string,
@@ -84,11 +130,13 @@ async function buildContext(
 		`${baseline}...HEAD`,
 	])
 	const cache = new Map<string, string>()
+	const listed = tracked.split('\n').filter(Boolean)
+	const files = listed.length > 0 ? listed : await walk(cwd)
 
 	return {
 		changed: diff.split('\n').filter(Boolean),
 		cwd,
-		files: tracked.split('\n').filter(Boolean),
+		files,
 		async read(file: string) {
 			const cached = cache.get(file)
 
