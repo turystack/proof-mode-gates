@@ -99,11 +99,11 @@ const PAIRS: Record<string, Pair> = {
 
 	'barrel-shape': {
 		clean: {
+			'src/components/index.ts': "export * from './button.js'\n",
 			// A file-based router names the `/` route `routes/index.tsx`; it is a
 			// screen, and every line of it would read as a barrel violation.
 			'src/routes/index.tsx':
 				"import { createFileRoute } from '@tanstack/react-router'\nexport const Route = createFileRoute('/')({})\n",
-			'src/components/index.ts': "export * from './button.js'\n",
 		},
 		dirty: {
 			'src/components/index.ts': 'export const VERSION = 1\n',
