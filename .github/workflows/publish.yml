@@ -55,6 +55,8 @@ jobs:
           npm version ${{ steps.bump-type.outputs.bump }} -m "chore: release %s"
           git push origin main --follow-tags
 
-      - run: npm publish --provenance --access public
+      # pnpm, not npm: prepack runs `pnpm run build`, and under `npm publish`
+      # that spawns a shell where pnpm is not on PATH — exit 127.
+      - run: pnpm publish --provenance --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
