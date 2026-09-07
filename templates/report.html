@@ -1,0 +1,1549 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gate Report</title>
+<style>
+  /* ---------------------------------------------------------------------
+     Tokens. The light palette is complete on bare :root so the un-stamped
+     document (system theme) always resolves; dark redefines tokens only.
+     Semantic colours are deliberately not the accent: green means "passed",
+     so it may not also mean "this is our brand".
+     --------------------------------------------------------------------- */
+  :root {
+    color-scheme: light dark;
+
+    --ink: #14181d;
+    --ink-soft: #454f5c;
+    --ink-faint: #6d7783;
+    --paper: #f5f6f4;
+    --surface: #ffffff;
+    --surface-sunken: #eceef0;
+    --rule: #d9dde2;
+    --rule-strong: #b9c0c9;
+
+    --accent: #2f4a7a;
+    --accent-soft: #e6ebf4;
+
+    --pass: #1c7d54;
+    --pass-soft: #e2f1ea;
+    --fail: #a8322d;
+    --fail-soft: #f8e6e5;
+    --warn: #9a6b12;
+    --warn-soft: #f7eedb;
+    --idle: #6d7783;
+    --idle-soft: #e9ebee;
+
+    --shadow: 0 1px 2px rgb(20 24 29 / 6%), 0 8px 24px -16px rgb(20 24 29 / 24%);
+
+    --step--1: 0.78rem;
+    --step-0: 0.94rem;
+    --step-1: 1.14rem;
+    --step-2: 1.5rem;
+    --step-3: 2.1rem;
+
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --serif: ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #e7eaee;
+      --ink-soft: #a7b0bb;
+      --ink-faint: #7b8592;
+      --paper: #11141a;
+      --surface: #181c23;
+      --surface-sunken: #131720;
+      --rule: #2a303a;
+      --rule-strong: #3b434f;
+      --accent: #8ba6dd;
+      --accent-soft: #1e2839;
+      --pass: #5cc394;
+      --pass-soft: #14291f;
+      --fail: #e88b85;
+      --fail-soft: #2d1917;
+      --warn: #d7a94f;
+      --warn-soft: #2a2216;
+      --idle: #8891a0;
+      --idle-soft: #1d222b;
+      --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 10px 28px -18px rgb(0 0 0 / 70%);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #e7eaee;
+    --ink-soft: #a7b0bb;
+    --ink-faint: #7b8592;
+    --paper: #11141a;
+    --surface: #181c23;
+    --surface-sunken: #131720;
+    --rule: #2a303a;
+    --rule-strong: #3b434f;
+    --accent: #8ba6dd;
+    --accent-soft: #1e2839;
+    --pass: #5cc394;
+    --pass-soft: #14291f;
+    --fail: #e88b85;
+    --fail-soft: #2d1917;
+    --warn: #d7a94f;
+    --warn-soft: #2a2216;
+    --idle: #8891a0;
+    --idle-soft: #1d222b;
+    --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 10px 28px -18px rgb(0 0 0 / 70%);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: var(--step-0);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+  .page {
+    max-width: 68rem;
+    margin-inline: auto;
+    padding: clamp(1.25rem, 3vw, 2.5rem) clamp(1rem, 3vw, 2rem) 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.25rem;
+  }
+
+  /* --- masthead ------------------------------------------------------- */
+
+  .masthead {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1.5rem 2rem;
+    align-items: start;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 0.35rem;
+  }
+
+  .masthead h1 {
+    font-family: var(--serif);
+    font-size: var(--step-3);
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0 0 0.6rem;
+  }
+
+  .masthead dl {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.4rem;
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  .masthead dl div { display: flex; gap: 0.4rem; }
+  .masthead dt { color: var(--ink-faint); }
+  .masthead dd { margin: 0; font-family: var(--mono); }
+
+  .verdict { display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem; text-align: right; }
+
+  .verdict-chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: var(--step-0);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+  }
+  .verdict-chip[data-state="pass"] { background: var(--pass-soft); color: var(--pass); border-color: color-mix(in srgb, var(--pass) 35%, transparent); }
+  .verdict-chip[data-state="fail"] { background: var(--fail-soft); color: var(--fail); border-color: color-mix(in srgb, var(--fail) 35%, transparent); }
+  .verdict small { color: var(--ink-faint); font-size: var(--step--1); }
+
+  .banner {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.85rem 1.1rem;
+    border-radius: 8px;
+    background: var(--fail-soft);
+    color: var(--fail);
+    border: 1px solid color-mix(in srgb, var(--fail) 30%, transparent);
+    font-size: var(--step--1);
+  }
+  .banner strong { font-family: var(--mono); }
+
+  /* --- sections -------------------------------------------------------- */
+
+  section { display: flex; flex-direction: column; gap: 1rem; }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 0.5rem;
+  }
+  .section-head h2 { font-size: var(--step-1); font-weight: 620; letter-spacing: -0.005em; margin: 0; }
+  .section-head p { margin: 0; color: var(--ink-faint); font-size: var(--step--1); max-width: 52ch; }
+
+  h3.sub {
+    margin: 0;
+    font-size: var(--step--1);
+    font-family: var(--mono);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .card { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; box-shadow: var(--shadow); }
+
+  /* --- gate ladder ----------------------------------------------------- */
+
+  .ladder { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+
+  .rung {
+    display: grid;
+    grid-template-columns: 3.25rem minmax(0, 1fr) auto;
+    gap: 0 1rem;
+    align-items: center;
+    padding: 0.85rem 1.1rem;
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+  }
+  .rung:last-child { border-bottom: 0; }
+  .rung::before { content: ""; position: absolute; left: 2.72rem; top: 0; bottom: 0; width: 2px; background: var(--rule); }
+  .rung:first-child::before { top: 50%; }
+  .rung:last-child::before { bottom: 50%; }
+
+  .rung-step {
+    position: relative;
+    z-index: 1;
+    width: 1.75rem;
+    height: 1.75rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font-family: var(--mono);
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
+    border: 2px solid var(--rule-strong);
+    background: var(--surface);
+    color: var(--ink-faint);
+    justify-self: end;
+  }
+  .rung[data-state="pass"] .rung-step { border-color: var(--pass); color: var(--pass); background: var(--pass-soft); }
+  .rung[data-state="fail"] .rung-step { border-color: var(--fail); color: var(--fail); background: var(--fail-soft); }
+  .rung[data-state="warn"] .rung-step { border-color: var(--warn); color: var(--warn); background: var(--warn-soft); }
+  .rung[data-state="skipped"] .rung-step { border-style: dashed; }
+
+  .rung-body { min-width: 0; display: flex; flex-direction: column; gap: 0.15rem; }
+  .rung-name { font-weight: 600; }
+  .rung-cmd { font-family: var(--mono); font-size: var(--step--1); color: var(--ink-faint); overflow-wrap: anywhere; }
+  .rung-note { font-size: var(--step--1); color: var(--ink-soft); }
+  .rung-result {
+    display: flex; align-items: center; gap: 0.75rem;
+    font-family: var(--mono); font-size: var(--step--1);
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+
+  .state {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.15rem 0.55rem; border-radius: 4px;
+    letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.7rem;
+  }
+  .state[data-state="pass"] { background: var(--pass-soft); color: var(--pass); }
+  .state[data-state="fail"] { background: var(--fail-soft); color: var(--fail); }
+  .state[data-state="warn"] { background: var(--warn-soft); color: var(--warn); }
+  .state[data-state="skipped"], .state[data-state="manual"], .state[data-state="missing"] { background: var(--idle-soft); color: var(--idle); }
+
+  /* --- tables ---------------------------------------------------------- */
+
+  .table-wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: var(--step--1); }
+
+  thead th {
+    text-align: left; font-family: var(--mono); font-weight: 500;
+    font-size: 0.7rem; letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--ink-faint); padding: 0.65rem 1.1rem;
+    border-bottom: 1px solid var(--rule); white-space: nowrap;
+  }
+  tbody td { padding: 0.65rem 1.1rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.mono, th.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  td.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .path { font-family: var(--mono); font-size: 0.8rem; overflow-wrap: anywhere; color: var(--ink-soft); }
+
+  .added { color: var(--pass); }
+  .removed { color: var(--fail); }
+
+  /* --- meters ---------------------------------------------------------- */
+
+  .meters { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); padding: 1.1rem; }
+  .meter { display: flex; flex-direction: column; gap: 0.4rem; }
+  .meter-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; }
+  .meter-label { font-size: var(--step--1); color: var(--ink-soft); }
+  .meter-value { font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 600; }
+  .meter-track { position: relative; height: 0.5rem; border-radius: 999px; background: var(--surface-sunken); }
+  .meter-fill { height: 100%; border-radius: 999px; background: var(--pass); }
+  .meter[data-state="fail"] .meter-fill { background: var(--fail); }
+  .meter[data-state="fail"] .meter-value { color: var(--fail); }
+  .meter-threshold { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink); opacity: 0.55; }
+  .meter-foot { font-size: 0.7rem; color: var(--ink-faint); font-family: var(--mono); display: flex; gap: 0.5rem; }
+  .trend[data-dir="up"] { color: var(--pass); }
+  .trend[data-dir="down"] { color: var(--fail); }
+
+  .coverage-pair { display: grid; gap: 0; }
+  .coverage-pair > .band {
+    padding: 0.5rem 1.1rem;
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    background: var(--surface-sunken);
+  }
+
+  /* --- matrix ---------------------------------------------------------- */
+
+  .matrix td.cell { text-align: center; font-family: var(--mono); }
+  .matrix td.cell[data-state="pass"] { color: var(--pass); }
+  .matrix td.cell[data-state="fail"] { color: var(--fail); background: var(--fail-soft); }
+  .matrix td.cell[data-state="n/a"] { color: var(--ink-faint); }
+
+  /* --- screens --------------------------------------------------------- */
+
+  .screens { display: flex; flex-direction: column; gap: 1.5rem; }
+  .screen { padding: 1.1rem; display: flex; flex-direction: column; gap: 1rem; }
+  .screen-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .screen-head h3 { margin: 0; font-size: var(--step-0); font-weight: 620; }
+  .screen-route { font-family: var(--mono); font-size: var(--step--1); color: var(--ink-faint); }
+
+  .compare { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
+  .strip { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); }
+
+  figure { margin: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+  figcaption {
+    font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.07em;
+    text-transform: uppercase; color: var(--ink-faint);
+    display: flex; justify-content: space-between; gap: 0.5rem;
+  }
+  figure img, figure .shot { width: 100%; display: block; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface-sunken); }
+  figure .shot[data-required="true"] { border-color: var(--fail); border-style: dashed; color: var(--fail); }
+
+  .checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.3rem; }
+  .checks li { display: grid; grid-template-columns: 1.1rem minmax(0, 1fr) auto; gap: 0.55rem; align-items: baseline; font-size: var(--step--1); }
+  .tick { font-family: var(--mono); color: var(--pass); }
+  .tick[data-state="fail"] { color: var(--fail); }
+  .checks .ref { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-faint); white-space: nowrap; }
+
+  /* --- stats ----------------------------------------------------------- */
+
+  .stats { display: flex; flex-wrap: wrap; gap: 0.6rem; padding: 1.1rem 1.1rem 0; }
+  .stat { display: flex; flex-direction: column; gap: 0.1rem; padding: 0.6rem 0.9rem; border-radius: 8px; background: var(--surface-sunken); min-width: 7.5rem; }
+  .stat-value { font-family: var(--mono); font-size: var(--step-2); font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .stat-label { font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); font-family: var(--mono); }
+
+  .detector { font-family: var(--mono); font-size: 0.72rem; padding: 0.1rem 0.45rem; border-radius: 4px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+  .detector[data-kind="manual"] { background: var(--idle-soft); color: var(--idle); }
+
+  details.raw { padding: 0; }
+  details.raw > summary { cursor: pointer; padding: 0.8rem 1.1rem; font-size: var(--step--1); color: var(--ink-soft); font-family: var(--mono); }
+  details.raw[open] > summary { border-bottom: 1px solid var(--rule); }
+  details.raw pre { margin: 0; padding: 1.1rem; overflow-x: auto; font-family: var(--mono); font-size: 0.75rem; line-height: 1.5; color: var(--ink-soft); }
+
+  footer.colophon {
+    border-top: 1px solid var(--rule);
+    padding-top: 1rem;
+    font-size: var(--step--1);
+    color: var(--ink-faint);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.4rem;
+    font-family: var(--mono);
+  }
+
+  @media print {
+    body { background: #fff; }
+    .card { box-shadow: none; }
+    details.raw { display: none; }
+  }
+</style>
+</head>
+<body>
+  <main class="page" id="report"></main>
+
+  <!--
+    ===================================================================
+    The runner replaces the contents of this block and nothing else.
+    Everything above renders from it, so the template and a real report
+    are the same file. Keep the id: `turystack-proof report --html` finds
+    the script by id and swaps its text. The same object is written next
+    to this file as gate-report.json for CI to read.
+    ===================================================================
+  -->
+  <script type="application/json" id="gate-report">
+{
+  "schema": "turystack.gate-report/1",
+  "task": {
+    "id": "ORD-142",
+    "title": "Cancel an order from the orders table",
+    "board": ".claude/skills/acme-spec/board/tasks.json#T-4",
+    "covers": [
+      "AC-1",
+      "AC-2",
+      "AC-3",
+      "AC-4",
+      "RULE-4",
+      "EVN-1",
+      "EVN-2"
+    ],
+    "branch": "feat/cancel-order",
+    "baseline": "main@4c81e07",
+    "commit": "9f3c1ab",
+    "author": "joaogabriel",
+    "finishedAt": "2026-08-15T18:42:11Z",
+    "durationMs": 214000
+  },
+  "provenance": {
+    "runner": "@turystack/proof-mode-gates 1.0.0",
+    "skills": [
+      {
+        "name": "tury-stack-architecture-pattern",
+        "version": "1.1.0"
+      },
+      {
+        "name": "tury-stack-backend-pattern",
+        "version": "1.1.0"
+      },
+      {
+        "name": "tury-stack-frontend-pattern",
+        "version": "1.1.0"
+      },
+      {
+        "name": "tury-stack-frontend-primitives-pattern",
+        "version": "1.1.0"
+      }
+    ]
+  },
+  "ladder": [
+    {
+      "id": "format",
+      "name": "Format",
+      "command": "biome format --write . && git diff --exit-code",
+      "state": "pass",
+      "result": "0 files rewritten",
+      "note": "A formatting diff after the fact means the gate ran on code nobody had formatted."
+    },
+    {
+      "id": "lint",
+      "name": "Lint",
+      "command": "biome check .",
+      "state": "pass",
+      "result": "0 errors · 0 warnings",
+      "note": "Includes the layer rules (ARC-LAY-*) and the GritQL plugins."
+    },
+    {
+      "id": "typecheck",
+      "name": "Typecheck",
+      "command": "tsc --noEmit",
+      "state": "pass",
+      "result": "0 errors"
+    },
+    {
+      "id": "structure",
+      "name": "Structure",
+      "command": "turystack-proof structure",
+      "state": "pass",
+      "result": "18 checks",
+      "note": "Barrels, file sets, route shape, generated artifacts untouched, catalogue shape."
+    },
+    {
+      "id": "test",
+      "name": "Unit + integration",
+      "command": "vitest run",
+      "state": "pass",
+      "result": "94 passed · 0 failed"
+    },
+    {
+      "id": "coverage",
+      "name": "Coverage",
+      "command": "vitest run --coverage",
+      "state": "pass",
+      "result": "total 91.4% · diff 94.1%",
+      "note": "Both floors apply; the diff floor is the higher one, because new code has no excuse."
+    },
+    {
+      "id": "e2e",
+      "name": "End to end",
+      "command": "vitest run --config vitest.e2e.config.ts",
+      "state": "pass",
+      "result": "7 passed · 0 failed",
+      "note": "Real database from docker-compose, no mocks."
+    },
+    {
+      "id": "visual",
+      "name": "Visual evidence",
+      "command": "playwright test --grep @evidence",
+      "state": "pass",
+      "result": "3 of 3 captures",
+      "note": "A required capture that is missing fails this rung; it never renders as an empty placeholder."
+    }
+  ],
+  "changed": {
+    "files": 14,
+    "added": 612,
+    "removed": 88,
+    "untested": [],
+    "entries": [
+      {
+        "path": "src/domains/order/use-cases/cancel-order/cancel-order.ts",
+        "added": 74,
+        "removed": 2,
+        "covered": 100
+      },
+      {
+        "path": "src/domains/order/order.entity.ts",
+        "added": 38,
+        "removed": 4,
+        "covered": 96.4
+      },
+      {
+        "path": "src/controllers/app/order/order.controller.ts",
+        "added": 21,
+        "removed": 0,
+        "covered": 88.9
+      },
+      {
+        "path": "src/features/orders/components/order-table/order-table.tsx",
+        "added": 96,
+        "removed": 31,
+        "covered": 91.2
+      },
+      {
+        "path": "src/features/orders/components/cancel-confirm/cancel-confirm.tsx",
+        "added": 118,
+        "removed": 0,
+        "covered": 93.6
+      },
+      {
+        "path": "src/routes/_app/orders.tsx",
+        "added": 24,
+        "removed": 9,
+        "covered": 90.0
+      }
+    ]
+  },
+  "context": [
+    {
+      "kind": "Capability spec",
+      "title": "Cancel an order — with its unhappy paths",
+      "source": "acme-spec › 01-definition.md",
+      "resolvedBy": "acme-spec"
+    },
+    {
+      "kind": "Domain model",
+      "title": "Order states and legal transitions",
+      "source": "acme-spec › 02-domains.md § Orders",
+      "resolvedBy": "acme-spec"
+    },
+    {
+      "kind": "Design",
+      "title": "Orders table — success, empty and denied",
+      "source": "acme-uiux › assets/orders-table*.png (2026-08-12)",
+      "resolvedBy": "acme-uiux"
+    },
+    {
+      "kind": "UI/UX rules",
+      "title": "Destructive confirm copy, denial reason pattern",
+      "source": "acme-uiux › 03-copy.md",
+      "resolvedBy": "acme-uiux"
+    },
+    {
+      "kind": "API contract",
+      "title": "POST /api/v1/app/orders/:orderId:cancel",
+      "source": "src/~sdk/orders (generated)",
+      "resolvedBy": "generated SDK"
+    }
+  ],
+  "law": {
+    "total": 359,
+    "touched": 46,
+    "automated": 38,
+    "manual": 8,
+    "violations": 0,
+    "bindings": [
+      {
+        "id": "ARC-LAY-2",
+        "law": "The domain imports no transport, persistence, adapter or framework.",
+        "detector": "biome:noRestrictedImports",
+        "state": "pass"
+      },
+      {
+        "id": "ARC-LAY-4",
+        "law": "Cross-module access only through the public operation.",
+        "detector": "biome:noRestrictedImports",
+        "state": "pass"
+      },
+      {
+        "id": "ARC-CON-3",
+        "law": "A transaction is never left open across an external call.",
+        "detector": "grit:no-external-call-in-tx",
+        "state": "pass"
+      },
+      {
+        "id": "ARC-SEC-1",
+        "law": "Scope comes from the authenticated context, never from a client field.",
+        "detector": "grit:no-scope-from-input",
+        "state": "pass"
+      },
+      {
+        "id": "ARC-TOP-7",
+        "law": "The clock is a declared dependency; business code never reads the runtime time.",
+        "detector": "grit:no-ambient-clock",
+        "state": "pass",
+        "note": "The 72h refund window reads the instant it was given."
+      },
+      {
+        "id": "ARC-CTR-4",
+        "law": "A generated artifact is never edited by hand.",
+        "detector": "gate:generated-untouched",
+        "state": "pass"
+      },
+      {
+        "id": "CTL-7",
+        "law": "A business action is a custom method (:verb, POST); a path segment names a resource, never an action.",
+        "detector": "gate:route-shape",
+        "state": "pass",
+        "note": "Catches a verb segment and a nominalized one (cancellation-impact); a plural nominalization still needs review."
+      },
+      {
+        "id": "ARC-ERR-8",
+        "law": "A remote read decides all five outcomes.",
+        "detector": "test:five-outcomes",
+        "state": "pass"
+      },
+      {
+        "id": "AXS-5",
+        "law": "A blocked primitive supplies the reachable channel for its reason.",
+        "detector": "test:denial-visible",
+        "state": "pass"
+      },
+      {
+        "id": "ARC-CON-11",
+        "law": "A destructive write shows its blast radius before it runs.",
+        "detector": "manual",
+        "state": "reviewed",
+        "reviewer": "joaogabriel",
+        "note": "I opened the impact read and compared it against the order's three shipments; the confirm lists all three."
+      },
+      {
+        "id": "ARC-DAT-4",
+        "law": "Removal is an explicit decision; soft delete is a state, not erasure.",
+        "detector": "grit:no-hard-delete",
+        "state": "pass",
+        "note": "Cancelling transitions state; it deletes nothing."
+      }
+    ]
+  },
+  "backend": {
+    "coverage": {
+      "floor": 85,
+      "diffFloor": 90,
+      "total": [
+        {
+          "label": "Lines",
+          "value": 91.4,
+          "baseline": 90.8
+        },
+        {
+          "label": "Branches",
+          "value": 88.2,
+          "baseline": 88.4
+        },
+        {
+          "label": "Functions",
+          "value": 93.1,
+          "baseline": 92.7
+        },
+        {
+          "label": "Statements",
+          "value": 91.6,
+          "baseline": 91.0
+        }
+      ],
+      "diff": [
+        {
+          "label": "Lines",
+          "value": 96.2
+        },
+        {
+          "label": "Branches",
+          "value": 92.5
+        },
+        {
+          "label": "Functions",
+          "value": 100
+        },
+        {
+          "label": "Statements",
+          "value": 96.0
+        }
+      ]
+    },
+    "specs": [
+      {
+        "spec": "AC-2 · A cancelled order cannot be cancelled again",
+        "test": "cancel-order.test.ts › rejects a cancelled order",
+        "level": "unit",
+        "state": "pass"
+      },
+      {
+        "spec": "AC-1 · Cancelling releases every reserved shipment",
+        "test": "cancel-order.test.ts › releases shipments",
+        "level": "integration",
+        "state": "pass"
+      },
+      {
+        "spec": "AC-3 · Only the owning organization may cancel",
+        "test": "cancel-order.e2e.test.ts › 403 for another org",
+        "level": "e2e",
+        "state": "pass"
+      },
+      {
+        "spec": "RULE-4 · The refund window is enforced at the entity, against an injected instant",
+        "test": "order.entity.test.ts › refuses after 72h",
+        "level": "unit",
+        "state": "pass"
+      },
+      {
+        "spec": "EVN-1 · Cancellation is idempotent under redelivery",
+        "test": "order-cancelled.handler.e2e.test.ts › duplicate delivery",
+        "level": "e2e",
+        "state": "pass"
+      },
+      {
+        "spec": "EVN-2 · An out-of-order redelivery does not resurrect the order",
+        "test": "order-cancelled.handler.e2e.test.ts › stale message",
+        "level": "e2e",
+        "state": "pass"
+      }
+    ],
+    "endpoints": [
+      {
+        "method": "POST",
+        "path": "/api/v1/app/orders/:orderId:cancel",
+        "status": "200 · 403 · 404 · 409",
+        "documented": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/app/orders/:orderId/shipments",
+        "status": "200 · 403 · 404",
+        "documented": true
+      }
+    ],
+    "migrations": [
+      {
+        "name": "0042_add_order_cancelled_at",
+        "phase": "expand",
+        "destructive": false,
+        "backfill": "none",
+        "reversible": true,
+        "state": "applied"
+      },
+      {
+        "name": "0043_backfill_order_cancelled_at",
+        "phase": "backfill",
+        "destructive": false,
+        "backfill": "batched, 5k rows",
+        "reversible": true,
+        "state": "applied"
+      }
+    ],
+    "docsShot": null
+  },
+  "contractDelta": [
+    {
+      "kind": "endpoint",
+      "change": "added",
+      "name": "POST /api/v1/app/orders/:orderId:cancel",
+      "breaking": false,
+      "note": "New custom method; no consumer depended on it before."
+    },
+    {
+      "kind": "error code",
+      "change": "added",
+      "name": "order.already_cancelled",
+      "breaking": false,
+      "note": "409; published in the catalogue and in the SDK's Exception union."
+    },
+    {
+      "kind": "permission",
+      "change": "added",
+      "name": "order:cancel",
+      "breaking": false,
+      "note": "Born in the backend catalogue (ARC-SEC-12), consumed by the client through the contract."
+    },
+    {
+      "kind": "event",
+      "change": "added",
+      "name": "order.cancelled",
+      "breaking": false,
+      "note": "Carries absolute state (ARC-IDM-5) plus the idempotency identifier."
+    },
+    {
+      "kind": "field",
+      "change": "added",
+      "name": "Order.cancelledAt",
+      "breaking": false,
+      "note": "Nullable — old consumers keep parsing (ARC-CTR-6)."
+    }
+  ],
+  "frontend": {
+    "coverage": {
+      "floor": 85,
+      "diffFloor": 90,
+      "total": [
+        {
+          "label": "Lines",
+          "value": 89.7,
+          "baseline": 89.9
+        },
+        {
+          "label": "Branches",
+          "value": 86.4,
+          "baseline": 85.1
+        },
+        {
+          "label": "Functions",
+          "value": 90.2,
+          "baseline": 90.0
+        },
+        {
+          "label": "Statements",
+          "value": 89.9,
+          "baseline": 90.1
+        }
+      ],
+      "diff": [
+        {
+          "label": "Lines",
+          "value": 93.8
+        },
+        {
+          "label": "Branches",
+          "value": 90.6
+        },
+        {
+          "label": "Functions",
+          "value": 95.5
+        },
+        {
+          "label": "Statements",
+          "value": 93.4
+        }
+      ]
+    },
+    "specs": [
+      {
+        "spec": "AC-3 · The table renders all five outcomes of the list read",
+        "test": "order-table.test.tsx › renders the five states",
+        "level": "component",
+        "state": "pass"
+      },
+      {
+        "spec": "AC-1 · Without the permission the action stays visible, inert and explained",
+        "test": "order-table.test.tsx › disabled with reason when denied",
+        "level": "component",
+        "state": "pass"
+      },
+      {
+        "spec": "AC-4 · The confirmation names every shipment the cancellation releases",
+        "test": "cancel-confirm.test.tsx › lists the blast radius",
+        "level": "component",
+        "state": "pass"
+      },
+      {
+        "spec": "UX-DR-1 · Opening a row puts its identity in the address",
+        "test": "orders.route.test.tsx › resourceId round-trip",
+        "level": "unit",
+        "state": "pass"
+      },
+      {
+        "spec": "UX-DR-2 · Cancelling refreshes the row without a full reload",
+        "test": "cancel-order.spec.ts › cancels and refreshes the row",
+        "level": "e2e",
+        "state": "pass"
+      },
+      {
+        "spec": "UX-DR-3 · The overlay traps focus and returns it to the trigger",
+        "test": "cancel-confirm.test.tsx › focus restored on close",
+        "level": "component",
+        "state": "pass"
+      }
+    ],
+    "outcomes": {
+      "states": [
+        "pending",
+        "empty",
+        "partial",
+        "error",
+        "success"
+      ],
+      "surfaces": [
+        {
+          "name": "Orders table",
+          "cells": {
+            "pending": "pass",
+            "empty": "pass",
+            "partial": "pass",
+            "error": "pass",
+            "success": "pass"
+          }
+        },
+        {
+          "name": "Cancellation impact",
+          "cells": {
+            "pending": "pass",
+            "empty": "pass",
+            "partial": "n/a",
+            "error": "pass",
+            "success": "pass"
+          }
+        },
+        {
+          "name": "Order detail sheet",
+          "cells": {
+            "pending": "pass",
+            "empty": "n/a",
+            "partial": "pass",
+            "error": "pass",
+            "success": "pass"
+          }
+        }
+      ]
+    },
+    "accessibility": {
+      "tool": "axe",
+      "surfaces": 3,
+      "violations": {
+        "critical": 0,
+        "serious": 0,
+        "moderate": 0,
+        "minor": 0
+      }
+    },
+    "bundle": {
+      "budgets": [
+        {
+          "name": "entry",
+          "value": 214.8,
+          "budget": 240,
+          "baseline": 213.1,
+          "unit": "kB"
+        },
+        {
+          "name": "route /orders",
+          "value": 63.2,
+          "budget": 80,
+          "baseline": 58.9,
+          "unit": "kB"
+        }
+      ]
+    },
+    "screens": [
+      {
+        "name": "Orders table — cancel action",
+        "route": "/orders?resourceId=ord_8812",
+        "proposed": null,
+        "required": [
+          "success",
+          "empty",
+          "denied"
+        ],
+        "captures": [
+          {
+            "state": "success",
+            "image": null
+          },
+          {
+            "state": "empty",
+            "image": null
+          },
+          {
+            "state": "denied",
+            "image": null
+          }
+        ],
+        "checks": [
+          {
+            "text": "Action stays visible and inert without permission, with its reason",
+            "ref": "PRM-2",
+            "state": "pass"
+          },
+          {
+            "text": "Confirmation shows the 3 shipments the cancellation releases",
+            "ref": "ARC-CON-11",
+            "state": "pass"
+          },
+          {
+            "text": "Overlay identity lives in the address (resourceId)",
+            "ref": "ARC-DEL-9",
+            "state": "pass"
+          }
+        ],
+        "tests": [
+          {
+            "test": "order-table.test.tsx › renders the five states",
+            "state": "pass"
+          },
+          {
+            "test": "order-table.test.tsx › disabled with reason when denied",
+            "state": "pass"
+          },
+          {
+            "test": "cancel-order.spec.ts › cancels and refreshes the row",
+            "state": "pass"
+          }
+        ]
+      }
+    ]
+  },
+  "raw": {
+    "biome": "Checked 214 files in 128ms. No fixes applied.",
+    "vitest": "Test Files  31 passed (31)\\n     Tests  94 passed (94)\\n  Duration  6.42s",
+    "coverage": "All files      |   91.4  |   88.2  |   93.1  |   91.6"
+  }
+}
+</script>
+
+  <script>
+  (() => {
+    const data = JSON.parse(document.getElementById('gate-report').textContent)
+    const root = document.getElementById('report')
+
+    const el = (tag, attrs = {}, ...children) => {
+      const node = document.createElement(tag)
+      for (const [key, value] of Object.entries(attrs)) {
+        if (value === null || value === undefined || value === false) { continue }
+        if (key === 'class') { node.className = value; continue }
+        if (key === 'text') { node.textContent = value; continue }
+        node.setAttribute(key, value)
+      }
+      for (const child of children.flat()) {
+        if (child === null || child === undefined || child === false) { continue }
+        node.append(child)
+      }
+      return node
+    }
+
+    const section = (title, blurb, ...body) =>
+      el('section', {},
+        el('div', { class: 'section-head' },
+          el('h2', { text: title }),
+          blurb ? el('p', { text: blurb }) : null),
+        ...body)
+
+    const stateChip = (state) => el('span', { class: 'state', 'data-state': state, text: state })
+    const signed = (value) => (value >= 0 ? '+' : '') + value.toFixed(1)
+
+    /* ---------------------------------------------------------------
+       Evidence that was required and never arrived is a failure, not a
+       placeholder. This is the report obeying ARC-TST-7 about itself:
+       nothing passes empty.
+       --------------------------------------------------------------- */
+    const gaps = []
+    for (const screen of data.frontend?.screens ?? []) {
+      const captured = new Set(
+        (screen.captures ?? []).filter((capture) => capture.image).map((capture) => capture.state),
+      )
+      for (const state of screen.required ?? []) {
+        if (!captured.has(state)) { gaps.push(`${screen.name} · ${state}`) }
+      }
+    }
+
+    const failedRungs = data.ladder.filter((rung) => rung.state === 'fail')
+    const green = data.ladder.filter((rung) => rung.state === 'pass').length
+    const notRun = data.ladder.length - green - failedRungs.length
+    const verdict = failedRungs.length > 0 || gaps.length > 0 ? 'fail' : 'pass'
+
+    /* --- shared builders ------------------------------------------------ */
+
+    const shot = (src, label, required) => {
+      if (src) { return el('img', { src, alt: label, loading: 'lazy' }) }
+      const missing = Boolean(required)
+      const message = missing ? 'required capture missing' : 'no capture'
+      const svg =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-label="' + label + '">' +
+        '<rect width="320" height="200" fill="none"/>' +
+        '<g fill="none" stroke="currentColor" stroke-width="1" opacity="0.35">' +
+        '<rect x="16" y="16" width="288" height="28" rx="4"/>' +
+        '<rect x="16" y="56" width="288" height="128" rx="4"/>' +
+        '<line x1="16" y1="88" x2="304" y2="88"/><line x1="16" y1="120" x2="304" y2="120"/>' +
+        '<line x1="16" y1="152" x2="304" y2="152"/></g>' +
+        '<text x="160" y="108" text-anchor="middle" font-family="ui-monospace, monospace" ' +
+        'font-size="11" fill="currentColor" opacity="0.75">' + message + '</text></svg>'
+      const box = el('div', {
+        class: 'shot',
+        'data-required': missing ? 'true' : 'false',
+        style: missing ? '' : 'color: var(--ink-faint)',
+      })
+      box.innerHTML = svg
+      return box
+    }
+
+    const meter = (metric, floor) => {
+      const ok = metric.value >= floor
+      const delta = metric.value - floor
+      const drift = metric.baseline === undefined ? null : metric.value - metric.baseline
+      return el('div', { class: 'meter', 'data-state': ok ? 'pass' : 'fail' },
+        el('div', { class: 'meter-head' },
+          el('span', { class: 'meter-label', text: metric.label }),
+          el('span', { class: 'meter-value', text: metric.value.toFixed(1) + '%' })),
+        el('div', { class: 'meter-track' },
+          el('div', { class: 'meter-fill', style: 'width:' + metric.value + '%' }),
+          el('div', { class: 'meter-threshold', style: 'left:' + floor + '%', title: 'Floor ' + floor + '%' })),
+        el('div', { class: 'meter-foot' },
+          el('span', { text: signed(delta) + ' vs floor ' + floor + '%' }),
+          drift === null
+            ? null
+            : el('span', {
+                class: 'trend',
+                'data-dir': drift >= 0 ? 'up' : 'down',
+                text: signed(drift) + ' vs baseline',
+              })))
+    }
+
+    /* Total coverage answers "is the codebase healthy". Diff coverage answers
+       "is the code this task wrote tested" — and only the second one can be
+       failed by the change under review. */
+    const coverageCard = (coverage) =>
+      el('div', { class: 'card coverage-pair' },
+        el('div', { class: 'band', text: 'whole codebase · floor ' + coverage.floor + '%' }),
+        el('div', { class: 'meters' }, coverage.total.map((metric) => meter(metric, coverage.floor))),
+        el('div', { class: 'band', text: 'lines this task changed · floor ' + coverage.diffFloor + '%' }),
+        el('div', { class: 'meters' }, coverage.diff.map((metric) => meter(metric, coverage.diffFloor))))
+
+    const specCard = (specs) =>
+      el('div', { class: 'card table-wrap' },
+        el('table', {},
+          el('thead', {}, el('tr', {},
+            el('th', { text: 'Spec' }),
+            el('th', { text: 'Proven by' }),
+            el('th', { text: 'Level' }),
+            el('th', { text: 'State' }))),
+          el('tbody', {}, specs.map((row) =>
+            el('tr', {},
+              el('td', { text: row.spec }),
+              el('td', {}, el('span', { class: 'path', text: row.test })),
+              el('td', { class: 'mono', text: row.level }),
+              el('td', {}, stateChip(row.state)))))))
+
+    /* --- masthead -------------------------------------------------------- */
+
+    const task = data.task
+    const meta = [
+      ['Task', task.id],
+      ['Branch', task.branch],
+      ['Commit', task.commit],
+      ['Base', task.baseline],
+      ['By', task.author],
+      ['Ran', new Date(task.finishedAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })],
+      ['Took', Math.round(task.durationMs / 1000) + 's'],
+    ]
+
+    root.append(
+      el('header', { class: 'masthead' },
+        el('div', {},
+          el('p', { class: 'eyebrow', text: 'Delivery gate report' }),
+          el('h1', { text: task.title }),
+          el('dl', {}, meta.map(([term, value]) =>
+            el('div', {}, el('dt', { text: term }), el('dd', { text: value }))))),
+        el('div', { class: 'verdict' },
+          el('span', { class: 'verdict-chip', 'data-state': verdict },
+            el('span', {
+              // "All gates green" is only true when every rung actually ran.
+              // A skipped rung is a fact worth showing, not a shade of green.
+              text: verdict === 'fail'
+                ? (failedRungs.length + gaps.length) + ' blocking'
+                : green === data.ladder.length
+                  ? 'All gates green'
+                  : green + ' of ' + data.ladder.length + ' green',
+            })),
+          el('small', {
+            text: notRun > 0
+              ? notRun + ' rung(s) did not run — see the ladder'
+              : green + ' of ' + data.ladder.length + ' gates passed',
+          }))))
+
+    if (gaps.length > 0) {
+      root.append(el('div', { class: 'banner' },
+        el('span', { text: '⃠' }),
+        el('span', {},
+          el('strong', { text: gaps.length + ' required capture(s) missing: ' }),
+          gaps.join(' · ') + '. A gate that renders an empty placeholder instead of failing is a gate that lies.')))
+    }
+
+    /* --- gate ladder ----------------------------------------------------- */
+
+    root.append(section(
+      'Gate ladder',
+      'Runs in order and stops at the first red rung, so a later gate never reports on code an earlier one rejected.',
+      el('div', { class: 'card' },
+        el('ol', { class: 'ladder' }, data.ladder.map((rung, index) =>
+          el('li', { class: 'rung', 'data-state': rung.state },
+            el('span', { class: 'rung-step', text: String(index + 1) }),
+            el('div', { class: 'rung-body' },
+              el('span', { class: 'rung-name', text: rung.name }),
+              el('code', { class: 'rung-cmd', text: rung.command }),
+              rung.note ? el('span', { class: 'rung-note', text: rung.note }) : null),
+            el('div', { class: 'rung-result' },
+              el('span', { text: rung.result || '' }),
+              stateChip(rung.state))))))))
+
+    /* --- what changed ----------------------------------------------------- */
+
+    const changed = data.changed
+    if (changed) {
+    root.append(section(
+      'What changed',
+      'The scope the green above actually covers. A file with new lines and no covering test is listed even when every total is healthy.',
+      el('div', { class: 'card' },
+        el('div', { class: 'stats' },
+          el('div', { class: 'stat' },
+            el('span', { class: 'stat-value', text: String(changed.files) }),
+            el('span', { class: 'stat-label', text: 'files' })),
+          el('div', { class: 'stat' },
+            el('span', { class: 'stat-value added', text: '+' + changed.added }),
+            el('span', { class: 'stat-label', text: 'added' })),
+          el('div', { class: 'stat' },
+            el('span', { class: 'stat-value removed', text: '−' + changed.removed }),
+            el('span', { class: 'stat-label', text: 'removed' })),
+          el('div', { class: 'stat' },
+            el('span', { class: 'stat-value', text: String(changed.untested.length) }),
+            el('span', { class: 'stat-label', text: 'untested' }))),
+        el('div', { class: 'table-wrap' },
+          el('table', {},
+            el('thead', {}, el('tr', {},
+              el('th', { text: 'File' }),
+              el('th', { text: 'Added' }),
+              el('th', { text: 'Removed' }),
+              el('th', { text: 'Covered' }))),
+            el('tbody', {}, changed.entries.map((row) =>
+              el('tr', {},
+                el('td', {}, el('span', { class: 'path', text: row.path })),
+                el('td', { class: 'num added', text: '+' + row.added }),
+                el('td', { class: 'num removed', text: '−' + row.removed }),
+                el('td', { class: 'num', text: row.covered.toFixed(1) + '%' })))))))))
+    }
+
+    /* --- context ---------------------------------------------------------- */
+
+    if (data.context) {
+    root.append(section(
+      'What this was built from',
+      'Every input the implementation was allowed to depend on, and the skill that resolved it. An empty row here means something was built over nothing.',
+      el('div', { class: 'card table-wrap' },
+        el('table', {},
+          el('thead', {}, el('tr', {},
+            el('th', { text: 'Input' }),
+            el('th', { text: 'What it says' }),
+            el('th', { text: 'Where it lives' }),
+            el('th', { text: 'Resolved by' }))),
+          el('tbody', {}, data.context.map((row) =>
+            el('tr', {},
+              el('td', { class: 'mono', text: row.kind }),
+              el('td', { text: row.title }),
+              el('td', {}, el('span', { class: 'path', text: row.source })),
+              el('td', { class: 'mono', text: row.resolvedBy }))))))))
+    }
+
+    /* --- law coverage ------------------------------------------------------ */
+
+    const law = data.law
+    if (law) {
+    root.append(section(
+      'Law coverage',
+      'Of the rules this change touched: which a machine checked, which a person signed, and how many were broken. A `manual` row is a claim a person is standing behind — it is counted apart so a green report is never read as a fully automated one.',
+      el('div', { class: 'card' },
+        el('div', { class: 'stats' },
+          el('div', { class: 'stat' },
+            el('span', { class: 'stat-value', text: law.touched + '/' + law.total }),
+            el('span', { class: 'stat-label', text: 'touched' })),
+          el('div', { class: 'stat' },
+            el('span', { class: 'stat-value', text: String(law.automated) }),
+            el('span', { class: 'stat-label', text: 'machine' })),
+          el('div', { class: 'stat' },
+            el('span', { class: 'stat-value', text: String(law.manual) }),
+            el('span', { class: 'stat-label', text: 'signed' })),
+          el('div', { class: 'stat' },
+            el('span', { class: 'stat-value', text: String(law.violations) }),
+            el('span', { class: 'stat-label', text: 'violations' })),
+          el('div', { class: 'stat' },
+            el('span', { class: 'stat-value', text: Math.round((law.automated / law.touched) * 100) + '%' }),
+            el('span', { class: 'stat-label', text: 'automated' }))),
+        el('div', { class: 'table-wrap' },
+          el('table', {},
+            el('thead', {}, el('tr', {},
+              el('th', { text: 'Rule' }),
+              el('th', { text: 'Law' }),
+              el('th', { text: 'Detector' }),
+              el('th', { text: 'State' }))),
+            el('tbody', {}, law.bindings.map((binding) =>
+              el('tr', {},
+                el('td', { class: 'mono', text: binding.id }),
+                el('td', {},
+                  binding.law,
+                  binding.note ? el('div', { class: 'path', text: binding.note }) : null,
+                  binding.reviewer ? el('div', { class: 'path', text: 'signed by ' + binding.reviewer }) : null),
+                el('td', {}, el('span', {
+                  class: 'detector',
+                  'data-kind': binding.detector === 'manual' ? 'manual' : 'auto',
+                  text: binding.detector,
+                })),
+                el('td', {}, stateChip(binding.state === 'reviewed' ? 'manual' : binding.state)))))),
+        law.bindings.length < law.touched
+          ? el('p', { class: 'path', text: 'Showing ' + law.bindings.length + ' of the ' + law.touched + ' laws this change touched.' })
+          : null)))
+    }
+
+    /* --- contract delta ----------------------------------------------------- */
+
+    if (data.contractDelta) {
+    root.append(section(
+      'Contract delta',
+      'What other people now depend on. A breaking change has to be visible in the delivery, not discovered by a consumer.',
+      el('div', { class: 'card table-wrap' },
+        el('table', {},
+          el('thead', {}, el('tr', {},
+            el('th', { text: 'Kind' }),
+            el('th', { text: 'Change' }),
+            el('th', { text: 'Name' }),
+            el('th', { text: 'Breaking' }))),
+          el('tbody', {}, data.contractDelta.map((row) =>
+            el('tr', {},
+              el('td', { class: 'mono', text: row.kind }),
+              el('td', { class: 'mono', text: row.change }),
+              el('td', {},
+                el('span', { class: 'path', text: row.name }),
+                row.note ? el('div', { class: 'path', text: row.note }) : null),
+              el('td', {}, stateChip(row.breaking ? 'fail' : 'pass')))))))))
+    }
+
+    /* --- backend ------------------------------------------------------------ */
+
+    const backend = data.backend
+    if (backend) {
+    root.append(section(
+      'Backend evidence',
+      'Coverage against both floors, every spec tied to the test that proves it, the endpoints as published, and what the migration did to the database.',
+      el('h3', { class: 'sub', text: 'Coverage' }),
+      coverageCard(backend.coverage),
+      el('h3', { class: 'sub', text: 'Specs' }),
+      specCard(backend.specs),
+      el('h3', { class: 'sub', text: 'Endpoints' }),
+      el('div', { class: 'card table-wrap' },
+        el('table', {},
+          el('thead', {}, el('tr', {},
+            el('th', { text: 'Method' }),
+            el('th', { text: 'Endpoint' }),
+            el('th', { text: 'Answers' }),
+            el('th', { text: 'In the docs' }))),
+          el('tbody', {}, backend.endpoints.map((row) =>
+            el('tr', {},
+              el('td', { class: 'mono', text: row.method }),
+              el('td', {}, el('span', { class: 'path', text: row.path })),
+              el('td', { class: 'mono', text: row.status }),
+              el('td', {}, stateChip(row.documented ? 'pass' : 'fail'))))))),
+      el('h3', { class: 'sub', text: 'Migrations' }),
+      el('div', { class: 'card table-wrap' },
+        el('table', {},
+          el('thead', {}, el('tr', {},
+            el('th', { text: 'Migration' }),
+            el('th', { text: 'Phase' }),
+            el('th', { text: 'Backfill' }),
+            el('th', { text: 'Reversible' }),
+            el('th', { text: 'State' }))),
+          el('tbody', {}, backend.migrations.map((row) =>
+            el('tr', {},
+              el('td', {}, el('span', { class: 'path', text: row.name })),
+              el('td', { class: 'mono', text: row.phase }),
+              el('td', { class: 'mono', text: row.backfill }),
+              el('td', {}, stateChip(row.reversible ? 'pass' : 'warn')),
+              el('td', {}, stateChip(row.state === 'applied' ? 'pass' : row.state))))))),
+      backend.docsShot
+        ? el('figure', { class: 'card', style: 'padding:1.1rem' },
+            shot(backend.docsShot, 'Published endpoint documentation'),
+            el('figcaption', {}, el('span', { text: 'Published endpoint docs' })))
+        : null))
+    }
+
+    /* --- frontend ------------------------------------------------------------ */
+
+    if (data.frontend && data.frontend.screens.length > 0) {
+      const frontend = data.frontend
+      const outcomes = frontend.outcomes
+      const a11y = frontend.accessibility
+      const violations = Object.values(a11y.violations).reduce((sum, count) => sum + count, 0)
+
+      root.append(section(
+        'Frontend evidence',
+        'The same two floors, the five outcomes as a matrix instead of a claim, the accessibility and size numbers, and the design next to what shipped.',
+        el('h3', { class: 'sub', text: 'Coverage' }),
+        coverageCard(frontend.coverage),
+        el('h3', { class: 'sub', text: 'Specs' }),
+        specCard(frontend.specs),
+
+        el('h3', { class: 'sub', text: 'Five outcomes per surface' }),
+        el('div', { class: 'card table-wrap' },
+          el('table', { class: 'matrix' },
+            el('thead', {}, el('tr', {},
+              el('th', { text: 'Surface' }),
+              outcomes.states.map((state) => el('th', { text: state })))),
+            el('tbody', {}, outcomes.surfaces.map((surface) =>
+              el('tr', {},
+                el('td', { text: surface.name }),
+                outcomes.states.map((state) => {
+                  const value = surface.cells[state] ?? 'fail'
+                  return el('td', {
+                    class: 'cell',
+                    'data-state': value,
+                    text: value === 'pass' ? '✓' : value === 'n/a' ? '–' : '✕',
+                    title: surface.name + ' · ' + state + ' · ' + value,
+                  })
+                })))))),
+
+        el('h3', { class: 'sub', text: 'Accessibility and size' }),
+        el('div', { class: 'card' },
+          el('div', { class: 'stats' },
+            el('div', { class: 'stat' },
+              el('span', { class: 'stat-value', text: String(violations) }),
+              el('span', { class: 'stat-label', text: a11y.tool + ' violations' })),
+            ...Object.entries(a11y.violations).map(([impact, count]) =>
+              el('div', { class: 'stat' },
+                el('span', { class: 'stat-value', text: String(count) }),
+                el('span', { class: 'stat-label', text: impact }))),
+          ),
+          el('div', { class: 'meters' }, frontend.bundle.budgets.map((budget) => meter(
+            {
+              label: budget.name + ' (' + budget.unit + ')',
+              value: Math.round((budget.value / budget.budget) * 1000) / 10,
+              baseline: Math.round((budget.baseline / budget.budget) * 1000) / 10,
+            },
+            0,
+          )))),
+
+        el('h3', { class: 'sub', text: 'Screens' }),
+        el('div', { class: 'screens' }, frontend.screens.map((screen) => {
+          const success = (screen.captures ?? []).find((capture) => capture.state === 'success')
+          const others = (screen.captures ?? []).filter((capture) => capture.state !== 'success')
+          const requires = (state) => (screen.required ?? []).includes(state)
+
+          return el('article', { class: 'card screen' },
+            el('div', { class: 'screen-head' },
+              el('h3', { text: screen.name }),
+              el('span', { class: 'screen-route', text: screen.route })),
+
+            el('div', { class: 'compare' },
+              el('figure', {},
+                shot(screen.proposed, 'Proposed design for ' + screen.name, true),
+                el('figcaption', {}, el('span', { text: 'Proposed' }), el('span', { text: 'design' }))),
+              el('figure', {},
+                shot(success?.image, 'Shipped screen for ' + screen.name, requires('success')),
+                el('figcaption', {}, el('span', { text: 'Shipped' }), el('span', { text: 'playwright' })))),
+
+            others.length > 0
+              ? el('div', { class: 'strip' }, others.map((capture) =>
+                  el('figure', {},
+                    shot(capture.image, screen.name + ' · ' + capture.state, requires(capture.state)),
+                    el('figcaption', {},
+                      el('span', { text: capture.state }),
+                      el('span', { text: requires(capture.state) ? 'required' : 'extra' })))))
+              : null,
+
+            el('div', { class: 'compare' },
+              el('div', {},
+                el('p', { class: 'eyebrow', text: 'Rules held' }),
+                el('ul', { class: 'checks' }, screen.checks.map((check) =>
+                  el('li', {},
+                    el('span', { class: 'tick', 'data-state': check.state, text: check.state === 'pass' ? '✓' : '✕' }),
+                    el('span', { text: check.text }),
+                    el('span', { class: 'ref', text: check.ref }))))),
+              el('div', {},
+                el('p', { class: 'eyebrow', text: 'Tests' }),
+                el('ul', { class: 'checks' }, screen.tests.map((test) =>
+                  el('li', {},
+                    el('span', { class: 'tick', 'data-state': test.state, text: test.state === 'pass' ? '✓' : '✕' }),
+                    el('span', { class: 'path', text: test.test }),
+                    el('span', { class: 'ref', text: test.state })))))))
+        }))))
+    }
+
+    /* --- structural checks -------------------------------------------------- */
+
+    if (data.structure && data.structure.length > 0) {
+      root.append(section(
+        'Structural checks',
+        'The gate:* bindings the skills name. A check this runner has not implemented reports as pending — never as passing, and never dropped.',
+        el('div', { class: 'card table-wrap' },
+          el('table', {},
+            el('thead', {}, el('tr', {},
+              el('th', { text: 'Check' }),
+              el('th', { text: 'Result' }),
+              el('th', { text: 'State' }))),
+            el('tbody', {}, data.structure.map((check) =>
+              el('tr', {},
+                el('td', { class: 'mono', text: 'gate:' + check.id }),
+                el('td', {},
+                  check.summary,
+                  ...(check.violations ?? []).map((violation) =>
+                    el('div', { class: 'path', text: violation.rule + '  ' + violation.file + (violation.line ? ':' + violation.line : '') + ' — ' + violation.message }))),
+                el('td', {}, stateChip(check.state)))))))))
+    }
+
+    /* --- raw --------------------------------------------------------------- */
+
+    if (data.raw) {
+      root.append(section(
+        'Raw output',
+        'Kept verbatim so a green report can always be checked against what the tools actually printed.',
+        ...Object.entries(data.raw).map(([tool, output]) =>
+          el('details', { class: 'card raw' },
+            el('summary', { text: tool }),
+            el('pre', { text: String(output).replace(/\\n/g, '\n') })))))
+    }
+
+    /* --- colophon ----------------------------------------------------------- */
+
+    const provenance = data.provenance ?? {}
+
+    root.append(el('footer', { class: 'colophon' },
+      el('span', { text: data.schema }),
+      provenance.runner ? el('span', { text: provenance.runner }) : null,
+      ...(provenance.skills ?? []).map((skill) =>
+        el('span', { text: skill.name.replace('tury-stack-', '') + ' ' + skill.version })),
+      el('span', { text: 'gate-report.json written beside this file' })))
+  })()
+  </script>
+</body>
+</html>
