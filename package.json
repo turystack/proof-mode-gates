@@ -2,7 +2,7 @@
 	"name": "@turystack/proof-mode-gates",
 	"description": "The gate runner: the delivery ladder, the structural checks the skills bind to, and the report whose verdict is computed rather than declared.",
 	"private": false,
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"type": "module",
 	"packageManager": "pnpm@10.12.3",
 	"sideEffects": false,
