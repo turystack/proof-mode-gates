@@ -781,12 +781,14 @@ const PAIRS: Record<string, Pair> = {
 
 	'one-catalogue': {
 		clean: {
-			'src/errors/catalogue.ts':
-				"export const ERRORS = createExceptions({ 'order.not-found': 404 })",
+			'domains/order/src/support/order.exceptions.ts':
+				"export const orderExceptions = createExceptions((e) => e.module('order', { conflict: ['already_paid'] }))",
 		},
 		dirty: {
-			'src/features/orders/orders.exceptions.ts':
-				"export const ORDER_ERRORS = { 'order.not-found': 404 }",
+			// The prefix is the domain's name, and this one publishes another
+			// domain's — which is exactly how two codes come to mean two things.
+			'domains/order/src/support/order.exceptions.ts':
+				"export const orderExceptions = createExceptions((e) => e.module('billing', { conflict: ['already_paid'] }))",
 		},
 	},
 
