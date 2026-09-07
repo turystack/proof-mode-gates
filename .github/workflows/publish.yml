@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  # Nothing reaches npm without the manifest and contents check passing.
+  # Nothing reaches npm without the suite passing.
   verify:
     if: "!contains(github.event.head_commit.message, 'chore: release')"
     uses: ./.github/workflows/ci.yml
@@ -25,14 +25,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      # This job was written for npm, but prepack builds with pnpm — without
-      # this step the publish dies with "pnpm: command not found".
       - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
 
       - name: Configure git
         run: |
@@ -56,11 +55,11 @@ jobs:
 
       - name: Bump version and tag
         run: |
-          npm version ${{ steps.bump-type.outputs.bump }} -m "chore: release %s"
+          pnpm version ${{ steps.bump-type.outputs.bump }} --message "chore: release %s"
           git push origin main --follow-tags
 
-      # pnpm, not npm: prepack runs `pnpm run build`, and under `npm publish`
-      # that spawns a shell where pnpm is not on PATH — exit 127.
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
       - run: pnpm publish --provenance --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
