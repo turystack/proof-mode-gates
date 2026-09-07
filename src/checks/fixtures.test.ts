@@ -389,10 +389,28 @@ const PAIRS: Record<string, Pair> = {
 
 	'domain-anatomy': {
 		clean: {
+			'domains/iam/src/entities/organization/index.ts':
+				"export * from './x.js'",
+			'domains/iam/src/entities/organization/organization.entity.ts':
+				'export class Organization {}',
+			'domains/iam/src/entities/organization/organization.mock.ts':
+				'export function mockOrganization() {}',
+			'domains/iam/src/entities/organization/organization.repository.ts':
+				'export class OrganizationRepository {}',
 			'domains/iam/src/entities/organization/organization.schema.ts':
 				'export const organizationSchema = {}',
+			'domains/iam/src/entities/organization/organization.types.ts':
+				'export type OrganizationKind = string',
+			'domains/iam/src/entities/user/index.ts': "export * from './x.js'",
+			'domains/iam/src/entities/user/user.entity.ts': 'export class User {}',
+			'domains/iam/src/entities/user/user.mock.ts':
+				'export function mockUser() {}',
+			'domains/iam/src/entities/user/user.repository.ts':
+				'export class UserRepository {}',
 			'domains/iam/src/entities/user/user.schema.ts':
 				'export const userSchema = {}',
+			'domains/iam/src/entities/user/user.types.ts':
+				'export type SocialProvider = string',
 			'domains/iam/src/use-cases/sign-up/index.ts':
 				"export { SignUp } from './sign-up.js'",
 			'domains/iam/src/use-cases/sign-up/sign-up.ts': 'export class SignUp {}',

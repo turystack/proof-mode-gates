@@ -91,6 +91,48 @@ export const domainAnatomy: Check = {
 			}
 		}
 
+		// Every aggregate is the same six files. The one that is missing is
+		// always the one nobody thought the aggregate needed — a workspace with
+		// no entity, a permission with no repository — and then the use case
+		// reaches the table directly because there is nothing else to call.
+		const held = new Map<string, Set<string>>()
+
+		for (const file of context.files) {
+			const match = /(?:^|\/)entities\/([^/]+)\/([^/]+)$/.exec(file)
+			const name = match?.[2]
+
+			if (!match?.[1] || !name) {
+				continue
+			}
+
+			const folder = file.slice(0, file.lastIndexOf('/'))
+			const seen = held.get(folder) ?? new Set<string>()
+
+			seen.add(name)
+			held.set(folder, seen)
+		}
+
+		for (const [folder, seen] of held) {
+			const aggregate = folder.split('/').pop() ?? ''
+
+			for (const required of [
+				`${aggregate}.schema.ts`,
+				`${aggregate}.types.ts`,
+				`${aggregate}.entity.ts`,
+				`${aggregate}.repository.ts`,
+				`${aggregate}.mock.ts`,
+				'index.ts',
+			]) {
+				if (!seen.has(required)) {
+					violations.push({
+						file: folder,
+						message: `no ${required} — every aggregate is the same six files, and the missing one is where a use case starts reaching the table instead`,
+						rule: 'PRJ-4',
+					})
+				}
+			}
+		}
+
 		// An operation is a folder holding the operation and a barrel. The
 		// barrel is what the domain's own index imports, so adding a file to an
 		// operation never changes the line that exports it.
