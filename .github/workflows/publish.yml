@@ -25,6 +25,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      # This job was written for npm, but prepack builds with pnpm — without
+      # this step the publish dies with "pnpm: command not found".
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
