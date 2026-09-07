@@ -44,6 +44,7 @@ export type {
 export { aclCoverage, routeIsAuthorized } from '@/checks/acl-coverage.js'
 export { barrelShape, offendingLine } from '@/checks/barrel-shape.js'
 export { componentFiles } from '@/checks/component-files.js'
+export { domainAnatomy } from '@/checks/domain-anatomy.js'
 export { folderShape } from '@/checks/folder-shape.js'
 export {
 	generatedUntouched,

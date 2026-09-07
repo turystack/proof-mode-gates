@@ -383,6 +383,25 @@ const PAIRS: Record<string, Pair> = {
 		},
 	},
 
+	'domain-anatomy': {
+		clean: {
+			'domains/iam/src/entities/organization/organization.schema.ts':
+				'export const organizationSchema = {}',
+			'domains/iam/src/entities/user/user.schema.ts':
+				'export const userSchema = {}',
+			'domains/iam/src/use-cases/sign-up/index.ts':
+				"export { SignUp } from './sign-up.js'",
+			'domains/iam/src/use-cases/sign-up/sign-up.ts': 'export class SignUp {}',
+		},
+		dirty: {
+			'domains/iam/src/entities/organization/organization.schema.ts':
+				'export const organizationSchema = {}',
+			'domains/iam/src/entities/user/user.schema.ts':
+				'export const userSchema = {}',
+			'domains/iam/src/iam.types.ts': 'export type Audience = string',
+		},
+	},
+
 	'domain-placement': {
 		clean: {
 			'src/domains/orders/cancel.ts':

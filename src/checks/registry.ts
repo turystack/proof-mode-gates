@@ -7,6 +7,7 @@ import { barrelShape } from '@/checks/barrel-shape.js'
 import { componentFiles } from '@/checks/component-files.js'
 import { CONTRACT_CHECKS } from '@/checks/contracts.js'
 import { DELIVERY_CHECKS } from '@/checks/delivery.js'
+import { domainAnatomy } from '@/checks/domain-anatomy.js'
 import { folderShape } from '@/checks/folder-shape.js'
 import { FRONTEND_STRUCTURE_CHECKS } from '@/checks/frontend-structure.js'
 import { generatedUntouched } from '@/checks/generated-untouched.js'
@@ -30,6 +31,7 @@ export const CHECKS: Check[] = [
 	aclCoverage,
 	barrelShape,
 	componentFiles,
+	domainAnatomy,
 	folderShape,
 	generatedUntouched,
 	oneCatalogue,
